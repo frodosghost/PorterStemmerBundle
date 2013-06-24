@@ -15,10 +15,10 @@
         "php": ">=5.3.2",
         "camspiers/porter-stemmer": "1.0.0"
     },
-    "target-dir": "Manhattan/PorterStemmerBundle",
+    "target-dir": "Manhattan/PorterStemmer",
     "autoload": {
         "psr-0": {
-            "Manhattan\\PorterStemmerBundle": ""
+            "Manhattan\\PorterStemmer": ""
         }
     },
     "version": "dev-master"
