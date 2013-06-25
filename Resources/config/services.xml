@@ -4,12 +4,14 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <!--parameters>
-
+    <parameters>
+        <parameter key="manhattan.porter.stemmer.class">Manhattan\PorterStemmerBundle\EventListener\StemmerListener</parameter>
     </parameters>
 
     <services>
-
-    </services-->
+        <service id="manhattan.porter.stemmer.listener" class="%manhattan.porter.stemmer.class%">
+            <tag name="doctrine.event_listener" event="onFlush" />
+        </service>
+    </services>
 
 </container>
