@@ -18,7 +18,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('manhattan_porterstemmer');
+        $rootNode = $treeBuilder->root('manhattan_porter_stemmer');
 
         return $treeBuilder;
     }
