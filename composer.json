@@ -1,5 +1,5 @@
 {
-    "name": "manhattan/porterstemmer-bundle",
+    "name": "manhattan/porter-stemmer-bundle",
     "description": "A Symfony 2 bundle for adding Porter Stemmer.",
     "type": "symfony-bundle",
     "keywords": ["saving", "search"],
