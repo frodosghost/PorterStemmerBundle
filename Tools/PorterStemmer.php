@@ -36,4 +36,11 @@ class PorterStemmer
         $this->porterStemmer = $porterStemmer;
     }
 
+    public function removeExcludedWords(array $words)
+    {
+        $words = array_map('strtolower', $words);
+
+        return array_diff($words, $this->exclusions);
+    }
+
 }

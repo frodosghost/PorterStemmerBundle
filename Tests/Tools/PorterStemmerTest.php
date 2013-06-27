@@ -29,4 +29,24 @@ class PorterStemmerTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Manhattan\PorterStemmerBundle\Tools\PorterStemmer', $porterStemmer);
     }
 
+    public function testRemoveExcludedWords()
+    {
+        $porterStemmer = new PorterStemmer($this->porter);
+
+        $words = array('why', 'before', 'during', 'doing', 'Itself', 'him', 'yours', 'above', 'very', 'daunting');
+        $this->assertEquals(array(9 => 'daunting'), $porterStemmer->removeExcludedWords($words), '->removeExcludedWords() removes all but one words from given array.');
+
+        $words = array('I', 'am', 'unsure', 'why', 'I', 'am', 'doing', 'this', 'writing', 'maybe', 'it', 'is', 'because', 'I', 'need', 'to', 'test', 'it', 'all');
+        $this->assertEquals(array(
+            2 => 'unsure',
+            8 => 'writing',
+            9 => 'maybe',
+            14 => 'need',
+            16 => 'test'
+        ), $porterStemmer->removeExcludedWords($words), '->removeExcludedWords() removes all of the required words from given array.');
+
+        $words = array('which', 'was', 'be', 'been', 'being', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'into', 'before', 'after', 'above');
+        $this->assertEquals(array(), $porterStemmer->removeExcludedWords($words), '->removeExcludedWords() removes all words from given array.');
+    }
+
 }
