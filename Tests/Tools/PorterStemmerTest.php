@@ -49,4 +49,12 @@ class PorterStemmerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(array(), $porterStemmer->removeExcludedWords($words), '->removeExcludedWords() removes all words from given array.');
     }
 
+    public function testStemPhrase()
+    {
+        $porterStemmer = new PorterStemmer($this->porter);
+
+        $sentance = 'I am unsure why I am doing this writing maybe it is because I need to test it all.';
+        $this->assertEquals(array('unsur', 'write', 'mayb', 'need', 'test'), $porterStemmer->stemPhrase($sentance), '->stemPhrase() returns stemmed words');
+    }
+
 }

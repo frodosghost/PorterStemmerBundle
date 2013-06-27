@@ -36,11 +36,41 @@ class PorterStemmer
         $this->porterStemmer = $porterStemmer;
     }
 
+    /**
+     * Takes a phrase or a sentance, breaks it into words
+     * then returns an array of stemmed words
+     *
+     * @param  string $phrase
+     * @return array
+     */
+    public function stemPhrase($phrase)
+    {
+        $stemmedWords = array();
+
+        // Split into Words
+        $words = str_word_count(strtolower($phrase), 1);
+        $words = $this->removeExcludedWords($words);
+
+        foreach ($words as $word) {
+            $stemmedWords[] = Porter::stem($word);
+        }
+
+        return $stemmedWords;
+    }
+
+    /**
+     * Removes excluded words from given array
+     *
+     * @param  array $words Array of words to be parsed
+     * @return array        Cleaned array with excluded words taken way
+     */
     public function removeExcludedWords(array $words)
     {
+        // Lowercase all words to ensure a match with excluded words
         $words = array_map('strtolower', $words);
 
         return array_diff($words, $this->exclusions);
     }
+
 
 }
