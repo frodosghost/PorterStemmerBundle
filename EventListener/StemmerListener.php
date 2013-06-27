@@ -72,10 +72,24 @@ class StemmerListener implements EventSubscriber
 
             if (($class = $this->getClassString()) !== null) {
                 if ($meta->hasAssociation($class .'s')) {
+                    echo '<pre>';
+                    print_r($this->configuration['PorterStemmer']['fields']);
+                    echo '</pre>';
 
+                    echo '<pre>';
+                    print_r($meta);
+                    echo '</pre>';
+                    exit;
+                    echo '<pre>';
+                    print_r(get_class($entity));
+                    echo '</pre>';
                 }
             }
 
+
+
+
+            //exit;
         }
 
         foreach ($uow->getScheduledEntityDeletions() AS $entity) {

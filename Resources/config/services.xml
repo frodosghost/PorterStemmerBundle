@@ -5,11 +5,18 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="manhattan.porter.stemmer.class">Manhattan\PorterStemmerBundle\EventListener\StemmerListener</parameter>
+        <parameter key="manhattan.porter.stemmer.listener.class">Manhattan\PorterStemmerBundle\EventListener\StemmerListener</parameter>
+        <parameter key="manhattan.porter.stemmer.class">Manhattan\PorterStemmerBundle\Tools\PorterStemmer</parameter>
+        <parameter key="porter.stemmer.class">Porter</parameter>
     </parameters>
 
     <services>
-        <service id="manhattan.porter.stemmer.listener" class="%manhattan.porter.stemmer.class%">
+        <service id="porter.stemmer" class="%porter.stemmer.class%" />
+        <service id="manhattan.porter.stemmer" class="%manhattan.porter.stemmer.class%">
+            <argument type="service" id="porter.stemmer" />
+        </service>
+
+        <service id="manhattan.porter.stemmer.listener" class="%manhattan.porter.stemmer.listener.class%">
             <argument type="service" id="annotation_reader" />
             <tag name="doctrine.event_subscriber" />
         </service>
