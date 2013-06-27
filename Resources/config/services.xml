@@ -10,6 +10,7 @@
 
     <services>
         <service id="manhattan.porter.stemmer.listener" class="%manhattan.porter.stemmer.class%">
+            <argument type="service" id="annotation_reader" />
             <tag name="doctrine.event_subscriber" />
         </service>
     </services>
