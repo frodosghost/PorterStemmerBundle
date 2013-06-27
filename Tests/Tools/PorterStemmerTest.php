@@ -14,9 +14,12 @@ class PorterStemmerTest extends \PHPUnit_Framework_TestCase
 
     private $porter;
 
+    private $adapter;
+
     public function setUp()
     {
         $this->porter = $this->getMock('Porter');
+        $this->adapter = $this->getMock('Manhattan\PorterStemmerBundle\Adapter\ORM\DoctrineAdapter');
     }
 
     /**
@@ -24,14 +27,14 @@ class PorterStemmerTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstruct()
     {
-        $porterStemmer = new PorterStemmer($this->porter);
+        $porterStemmer = new PorterStemmer($this->porter, $this->adapter);
 
         $this->assertInstanceOf('Manhattan\PorterStemmerBundle\Tools\PorterStemmer', $porterStemmer);
     }
 
     public function testRemoveExcludedWords()
     {
-        $porterStemmer = new PorterStemmer($this->porter);
+        $porterStemmer = new PorterStemmer($this->porter, $this->adapter);
 
         $words = array('why', 'before', 'during', 'doing', 'Itself', 'him', 'yours', 'above', 'very', 'daunting');
         $this->assertEquals(array(9 => 'daunting'), $porterStemmer->removeExcludedWords($words), '->removeExcludedWords() removes all but one words from given array.');
@@ -51,7 +54,7 @@ class PorterStemmerTest extends \PHPUnit_Framework_TestCase
 
     public function testStemPhrase()
     {
-        $porterStemmer = new PorterStemmer($this->porter);
+        $porterStemmer = new PorterStemmer($this->porter, $this->adapter);
 
         $sentance = 'I am unsure why I am doing this writing maybe it is because I need to test it all.';
         $this->assertEquals(array('unsur', 'write', 'mayb', 'need', 'test'), $porterStemmer->stemPhrase($sentance), '->stemPhrase() returns stemmed words');
