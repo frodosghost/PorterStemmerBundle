@@ -52,6 +52,11 @@ class PorterStemmer
         $words = $this->removeExcludedWords($words);
 
         foreach ($words as $word) {
+            // Ignore words/characters with 1-2 characters
+            if (strlen($word) <= 2) {
+                continue;
+            }
+
             $stemmedWords[] = Porter::stem($word);
         }
 
