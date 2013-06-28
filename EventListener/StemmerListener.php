@@ -77,6 +77,7 @@ class StemmerListener implements EventSubscriber
                 $this->getOrmAdapter()->setConfiguration($config);
 
                 $this->getOrmAdapter()->insert($em, $entity);
+                $uow->recomputeSingleEntityChangeSet($meta, $entity);
             }
         }
 

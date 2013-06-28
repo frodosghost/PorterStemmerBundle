@@ -103,20 +103,24 @@ class DoctrineAdapter implements AdapterInterface
     {
         $arrayText = array();
         $rawText = '';
+        $properties = $meta->getReflectionProperties();
 
         foreach ($this->configuration['fields'] as $field) {
-            $fieldValue = $meta->getReflectionProperty($field['name'])->getValue($object);
+            if (array_key_exists($field['name'], $properties)) {
+                $refProperty = $meta->getReflectionProperty($field['name']);
+                $fieldValue = $refProperty->getValue($object);
 
-            // Update fieldText to format array to text
-            if ($fieldValue instanceof PersistentCollection) {
-                $arrayText = $fieldValue->map(function($item) {
-                    return $item->__toString();
-                });
+                // Update fieldText to format array to text
+                if ($fieldValue instanceof PersistentCollection) {
+                    $arrayText = $fieldValue->map(function($item) {
+                        return $item->__toString();
+                    });
 
-                $fieldValue = implode(" ", $arrayText->toArray());
+                    $fieldValue = implode(" ", $arrayText->toArray());
+                }
+
+                $rawText .= str_repeat(' '. $fieldValue, $field['weight']);
             }
-
-            $rawText .= str_repeat(' '. $fieldValue, $field['weight']);
         }
 
         $stemmedWords = $this->porterStemmer->stemPhrase($rawText);
