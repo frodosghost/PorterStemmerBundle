@@ -13,10 +13,13 @@
 
     <services>
         <service id="porter.stemmer" class="%porter.stemmer.class%" />
-        <service id="porter.stemmer.adapter" class="%manhattan.porter.adapter.class%" />
 
         <service id="manhattan.porter.stemmer" class="%manhattan.porter.stemmer.class%">
             <argument type="service" id="porter.stemmer" />
+        </service>
+
+        <service id="porter.stemmer.adapter" class="%manhattan.porter.adapter.class%">
+            <argument type="service" id="manhattan.porter.stemmer" />
         </service>
 
         <service id="manhattan.porter.stemmer.listener" class="%manhattan.porter.stemmer.listener.class%">

@@ -6,6 +6,7 @@ use Doctrine\ORM\Events;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Annotations\Reader;
+use Manhattan\PorterStemmerBundle\Adapter\AdapterInterface;
 
 use Manhattan\PorterStemmerBundle\Mapping\Annotation\PorterStemmer;
 use Manhattan\PorterStemmerBundle\Mapping\Annotation\Stem;
@@ -26,15 +27,22 @@ class StemmerListener implements EventSubscriber
     private $annotationReader;
 
     /**
+     * AdapterInterface
+     * @var AdapterInterface
+     */
+    private $ormAdapter;
+
+    /**
      * Configuration
      *
      * @var array
      */
     private $configuration;
 
-    public function __construct(Reader $annotationReader)
+    public function __construct(Reader $annotationReader, AdapterInterface $adapter)
     {
         $this->annotationReader = $annotationReader;
+        $this->ormAdapter = $adapter;
     }
 
     /**
@@ -51,8 +59,7 @@ class StemmerListener implements EventSubscriber
     }
 
     /**
-     * Generate slug on objects being updated during flush
-     * if they require changing
+     * Generate stemmed phrases and persist when content is updated
      *
      * @param EventArgs $args
      * @return void
@@ -64,38 +71,39 @@ class StemmerListener implements EventSubscriber
         $empty = $args->getEmptyInstance();
 
         foreach ($uow->getScheduledEntityInsertions() AS $entity) {
+            $meta = $em->getClassMetadata(get_class($entity));
 
+            if (($config = $this->configuration) !== null) {
+                $this->getOrmAdapter()->setConfiguration($config);
+
+                $this->getOrmAdapter()->insert($em, $entity);
+            }
         }
 
         foreach ($uow->getScheduledEntityUpdates() AS $entity) {
             $meta = $em->getClassMetadata(get_class($entity));
 
-            if (($class = $this->getClassString()) !== null) {
-                if ($meta->hasAssociation($class .'s')) {
-                    echo '<pre>';
-                    print_r($this->configuration['PorterStemmer']['fields']);
-                    echo '</pre>';
+            if (($config = $this->configuration) !== null) {
+                $this->getOrmAdapter()->setConfiguration($config);
 
-                    echo '<pre>';
-                    print_r($meta);
-                    echo '</pre>';
-                    exit;
-                    echo '<pre>';
-                    print_r(get_class($entity));
-                    echo '</pre>';
-                }
+                // Remove all existing entities mapped
+                $this->getOrmAdapter()->remove($em, $entity);
+                // Insert new from updated content
+                $this->getOrmAdapter()->insert($em, $entity);
             }
-
-
-
-
-            //exit;
         }
 
         foreach ($uow->getScheduledEntityDeletions() AS $entity) {
+            $meta = $em->getClassMetadata(get_class($entity));
 
+            if (($config = $this->configuration) !== null) {
+                $this->getOrmAdapter()->setConfiguration($config);
+
+                $this->getOrmAdapter()->remove($em, $entity);
+            }
         }
 
+        $uow->computeChangeSets();
     }
 
     /**
@@ -113,48 +121,50 @@ class StemmerListener implements EventSubscriber
         // obtained from the $metadata
         $class = $meta->getReflectionClass();
 
-        foreach ($class->getProperties() as $property) {
-            $propertyAnnotations = $reader->getPropertyAnnotations($property);
+        if ($class instanceof \ReflectionClass) {
+            $annotations = $reader->getClassAnnotations($class);
+        } else {
+            $annotations = false;
+        }
 
-            if (count($propertyAnnotations) > 0) {
-                foreach ($propertyAnnotations as $annotation) {
-                    if ($annotation instanceof Stem) {
-                        $this->configuration['PorterStemmer']['fields'][$property->name] = $annotation->weight;
+        if ($annotations) {
+            foreach ($reader->getClassAnnotations($class) as $annotation) {
+                if ($annotation instanceof PorterStemmer) {
+                    $this->configuration['objectClass'] = $annotation->class;
+                    $this->configuration['mappedField'] = strtolower($this->getName($meta->name));
+
+                    foreach ($class->getProperties() as $property) {
+                        $propertyAnnotations = $reader->getPropertyAnnotations($property);
+
+                        if (count($propertyAnnotations) > 0) {
+                            foreach ($propertyAnnotations as $annotation) {
+                                if ($annotation instanceof Stem) {
+                                    $this->configuration['fields'][] = array(
+                                        'name'   => $property->name,
+                                        'weight' => $annotation->weight
+                                    );
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
 
-        foreach ($reader->getClassAnnotations($class) as $annotation) {
-            if ($annotation instanceof PorterStemmer) {
-                $this->configuration['PorterStemmer']['class'] = $annotation->class;
-
-                $meta->mapOneToMany(array(
-                    'targetEntity' => $this->configuration['PorterStemmer']['class'],
-                    'fieldName' => $this->getClassString() .'s',
-                    'mappedBy' => $this->getClassString()
-                ));
-            }
-        }
     }
 
     /**
-     * Formats classname to be lowercase string
-     *
-     * @return string
+     * Returns last part of namespace
      */
-    private function getClassString()
+    private function getName($name)
     {
-        $loweredString = null;
+        $parts = explode('\\', $name);
+        return end($parts);
+    }
 
-        if (isset($this->configuration['PorterStemmer']['class'])) {
-            $parts = explode('\\', $this->configuration['PorterStemmer']['class']);
-            $mapped = end($parts);
-
-            $loweredString = strtolower($mapped);
-        }
-
-        return $loweredString;
+    public function getOrmAdapter()
+    {
+        return $this->ormAdapter;
     }
 
 }
