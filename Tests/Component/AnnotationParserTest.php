@@ -46,7 +46,6 @@ class AnnotationParserTest extends \PHPUnit_Framework_TestCase
 
         $this->setExpectedException('\Manhattan\PorterStemmerBundle\Exception\ConfigurationException');
         $annotationParser->configureMetadata($classMetadata);
-        //$this->assertInstanceOf('Manhattan\PorterStemmerBundle\Component\AnnotationParser', $annotationParser->setClassMetadata($classMetadata));
     }
 
     public function testConfigureMetadata()

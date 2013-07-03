@@ -8,6 +8,7 @@
         <parameter key="manhattan.porter.stemmer.listener.class">Manhattan\PorterStemmerBundle\EventListener\StemmerListener</parameter>
         <parameter key="manhattan.porter.stemmer.class">Manhattan\PorterStemmerBundle\Tools\PorterStemmer</parameter>
         <parameter key="manhattan.porter.adapter.class">Manhattan\PorterStemmerBundle\Adapter\ORM\DoctrineAdapter</parameter>
+        <parameter key="manhattan.porter.component.annotation.class">Manhattan\PorterStemmerBundle\Component\AnnotationParser</parameter>
         <parameter key="porter.stemmer.class">Porter</parameter>
     </parameters>
 
@@ -22,8 +23,12 @@
             <argument type="service" id="manhattan.porter.stemmer" />
         </service>
 
-        <service id="manhattan.porter.stemmer.listener" class="%manhattan.porter.stemmer.listener.class%">
+        <service id="porter.stemmer.annotation.component" class="%manhattan.porter.component.annotation.class%">
             <argument type="service" id="annotation_reader" />
+        </service>
+
+        <service id="manhattan.porter.stemmer.listener" class="%manhattan.porter.stemmer.listener.class%">
+            <argument type="service" id="porter.stemmer.annotation.component" />
             <argument type="service" id="porter.stemmer.adapter" />
             <tag name="doctrine.event_subscriber" />
         </service>
