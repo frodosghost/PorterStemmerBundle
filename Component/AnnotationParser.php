@@ -46,6 +46,8 @@ class AnnotationParser
     public function __construct(Reader $annotationReader)
     {
         $this->annotationReader = $annotationReader;
+
+        return $this;
     }
 
     public function parse()
@@ -58,7 +60,7 @@ class AnnotationParser
                 $configuration['objectClass'] = $annotation->class;
                 $configuration['mappedField'] = strtolower($this->getName($this->classMetadata->name));
 
-                foreach ($class->getProperties() as $property) {
+                foreach ($this->reflectionClass->getProperties() as $property) {
                     $propertyAnnotations = $this->annotationReader->getPropertyAnnotations($property);
 
                     if (count($propertyAnnotations) > 0) {
@@ -78,6 +80,13 @@ class AnnotationParser
         return $configuration;
     }
 
+    /**
+     * Configures Metadata.
+     * Checks and sets ReflectionClass
+     *
+     * @param  ClassMetadata $classMetadata
+     * @return AnnotationParser
+     */
     public function configureMetadata(ClassMetadata $classMetadata)
     {
         $this->classMetadata = $classMetadata;
