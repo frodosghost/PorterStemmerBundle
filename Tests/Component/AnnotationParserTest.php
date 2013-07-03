@@ -28,40 +28,46 @@ class AnnotationParserTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Manhattan\PorterStemmerBundle\Component\AnnotationParser', $annotationParser);
     }
 
-    public function testIncorrectReflectionClass()
+    public function testIncorrectConfigureMetadata()
     {
         $annotationParser = new AnnotationParser($this->annotationReader);
 
         $this->setExpectedException('\Exception');
-        $annotationParser->setReflectionClass(null);
+        $annotationParser->configureMetadata(null);
     }
 
-    public function testSetReflectionClass()
-    {
-        $annotationParser = new AnnotationParser($this->annotationReader);
-
-        $reflectionClass = $this->getMockBuilder('ReflectionClass')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->assertInstanceOf('Manhattan\PorterStemmerBundle\Component\AnnotationParser', $annotationParser->setReflectionClass($reflectionClass));
-    }
-
-    public function testIncorrectClassMetadata()
-    {
-        $annotationParser = new AnnotationParser($this->annotationReader);
-
-        $this->setExpectedException('\Exception');
-        $annotationParser->setClassMetadata(null);
-    }
-
-    public function testSetClassMetadata()
+    public function testIncompleteConfigureMetadata()
     {
         $annotationParser = new AnnotationParser($this->annotationReader);
 
         $classMetadata = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadata')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->assertInstanceOf('Manhattan\PorterStemmerBundle\Component\AnnotationParser', $annotationParser->setClassMetadata($classMetadata));
+
+        $this->setExpectedException('\Manhattan\PorterStemmerBundle\Exception\ConfigurationException');
+        $annotationParser->configureMetadata($classMetadata);
+        //$this->assertInstanceOf('Manhattan\PorterStemmerBundle\Component\AnnotationParser', $annotationParser->setClassMetadata($classMetadata));
+    }
+
+    public function testConfigureMetadata()
+    {
+        $annotationParser = new AnnotationParser($this->annotationReader);
+        $test = $this;
+
+        $classMetadata = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadata')
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $classMetadata->expects($this->any())
+            ->method('getReflectionClass')
+            ->will($this->returnCallback(function () use ($test) {
+                return $test->getMockBuilder('ReflectionClass')
+                        ->disableOriginalConstructor()
+                        ->getMock();
+            }));
+
+        $this->assertInstanceOf('Manhattan\PorterStemmerBundle\Component\AnnotationParser', $annotationParser->configureMetadata($classMetadata));
     }
 
 }
+
