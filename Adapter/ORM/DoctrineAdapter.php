@@ -88,7 +88,7 @@ class DoctrineAdapter implements AdapterInterface
             $new->getReflectionProperty('weight')->setValue($newEntity, $weight);
             $new->getReflectionProperty($this->getName($meta->name))->setValue($newEntity, $object);
 
-            $uow->scheduleForInsert($newEntity);
+            $uow->persist($newEntity);
         }
     }
 

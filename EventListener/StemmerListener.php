@@ -5,8 +5,9 @@ namespace Manhattan\PorterStemmerBundle\EventListener;
 use Doctrine\ORM\Events;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\Common\Annotations\Reader;
 use Manhattan\PorterStemmerBundle\Adapter\AdapterInterface;
+use Manhattan\PorterStemmerBundle\Component\AnnotationParser;
+use Manhattan\PorterStemmerBundle\Exception\ConfigurationException;
 
 use Manhattan\PorterStemmerBundle\Mapping\Annotation\PorterStemmer;
 use Manhattan\PorterStemmerBundle\Mapping\Annotation\Stem;
@@ -20,11 +21,11 @@ class StemmerListener implements EventSubscriber
 {
 
     /**
-     * AnnotationReader
+     * AnnotationParser
      *
-     * @var Doctrine\Common\Annotations\AnnotationReader
+     * @var Manhattan\PorterStemmerBundle\Component\AnnotationParser
      */
-    private $annotationReader;
+    private $annotationParser;
 
     /**
      * AdapterInterface
@@ -39,9 +40,9 @@ class StemmerListener implements EventSubscriber
      */
     private $configuration;
 
-    public function __construct(Reader $annotationReader, AdapterInterface $adapter)
+    public function __construct(AnnotationParser $annotationParser, AdapterInterface $adapter)
     {
-        $this->annotationReader = $annotationReader;
+        $this->annotationParser = $annotationParser;
         $this->ormAdapter = $adapter;
     }
 
@@ -114,53 +115,26 @@ class StemmerListener implements EventSubscriber
      */
     public function loadClassMetadata(EventArgs $args)
     {
-        // annotation reader gets the annotations for the class
-        $reader = $this->annotationReader;
         $meta = $args->getClassMetadata();
 
-        // the annotation reader accepts a ReflectionClass, which can be
-        // obtained from the $metadata
-        $class = $meta->getReflectionClass();
-
-        if ($class instanceof \ReflectionClass) {
-            $annotations = $reader->getClassAnnotations($class);
-        } else {
-            $annotations = false;
+        try {
+            $configuration = $this->getAnnotationParser()
+                ->configureMetadata($meta)
+                ->parse();
+        } catch (ConfigurationException $e) {
+            $configuration = false;
         }
-
-        if ($annotations) {
-            foreach ($reader->getClassAnnotations($class) as $annotation) {
-                if ($annotation instanceof PorterStemmer) {
-                    $this->configuration['objectClass'] = $annotation->class;
-                    $this->configuration['mappedField'] = strtolower($this->getName($meta->name));
-
-                    foreach ($class->getProperties() as $property) {
-                        $propertyAnnotations = $reader->getPropertyAnnotations($property);
-
-                        if (count($propertyAnnotations) > 0) {
-                            foreach ($propertyAnnotations as $annotation) {
-                                if ($annotation instanceof Stem) {
-                                    $this->configuration['fields'][] = array(
-                                        'name'   => $property->name,
-                                        'weight' => $annotation->weight
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        if ($configuration) {
+            $this->configuration = $configuration;
         }
 
     }
 
-    /**
-     * Returns last part of namespace
-     */
-    private function getName($name)
+
+
+    public function getAnnotationParser()
     {
-        $parts = explode('\\', $name);
-        return end($parts);
+        return $this->annotationParser;
     }
 
     public function getOrmAdapter()
