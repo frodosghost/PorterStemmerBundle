@@ -59,6 +59,7 @@ class AnnotationParser
             if ($annotation instanceof PorterStemmer) {
                 $configuration['objectClass'] = $annotation->class;
                 $configuration['mappedField'] = strtolower($this->getName($this->classMetadata->name));
+                $configuration['mappedClass'] = $this->classMetadata->name;
 
                 foreach ($this->reflectionClass->getProperties() as $property) {
                     $propertyAnnotations = $this->annotationReader->getPropertyAnnotations($property);
