@@ -15,3 +15,10 @@ Installation
 ------------
 
 All the installation instructions are located in the [documentation](https://github.com/frodosghost/AtomLoggerBundle/blob/master/Resources/doc/index.md).
+
+License
+-------
+
+This bundle is under the MIT license. See the complete license in the bundle:
+
+    [LICENCE](LICENCE).
