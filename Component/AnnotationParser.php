@@ -52,14 +52,16 @@ class AnnotationParser
 
     public function parse()
     {
-        $configuration = array();
+        $configuration = null;
         $annotations = $this->annotationReader->getClassAnnotations($this->reflectionClass);
 
         foreach ($annotations as $annotation) {
             if ($annotation instanceof PorterStemmer) {
-                $configuration['objectClass'] = $annotation->class;
-                $configuration['mappedField'] = strtolower($this->getName($this->classMetadata->name));
-                $configuration['mappedClass'] = $this->classMetadata->name;
+                $configuration = new Configuration();
+
+                $configuration->setObjectClass($annotation->class);
+                $configuration->setMappedField(strtolower($this->getName($this->classMetadata->name)));
+                $configuration->setMappedClass($this->classMetadata->name);
 
                 foreach ($this->reflectionClass->getProperties() as $property) {
                     $propertyAnnotations = $this->annotationReader->getPropertyAnnotations($property);
@@ -67,10 +69,10 @@ class AnnotationParser
                     if (count($propertyAnnotations) > 0) {
                         foreach ($propertyAnnotations as $annotation) {
                             if ($annotation instanceof Stem) {
-                                $configuration['fields'][] = array(
+                                $configuration->addField(array(
                                     'name'   => $property->name,
                                     'weight' => $annotation->weight
-                                );
+                                ));
                             }
                         }
                     }
