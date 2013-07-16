@@ -74,7 +74,7 @@ class StemmerListener implements EventSubscriber
         foreach ($uow->getScheduledEntityInsertions() AS $entity) {
             $meta = $em->getClassMetadata(get_class($entity));
 
-            if (($config = $this->configuration) !== null) {
+            if ( (($config = $this->configuration) !== null) && ($this->isMappedClass($entity)) ) {
                 $this->getOrmAdapter()->setConfiguration($config);
 
                 $this->getOrmAdapter()->insert($em, $entity);
@@ -85,7 +85,7 @@ class StemmerListener implements EventSubscriber
         foreach ($uow->getScheduledEntityUpdates() AS $entity) {
             $meta = $em->getClassMetadata(get_class($entity));
 
-            if (($config = $this->configuration) !== null) {
+            if ( (($config = $this->configuration) !== null) && ($this->isMappedClass($entity)) ) {
                 $this->getOrmAdapter()->setConfiguration($config);
 
                 // Remove all existing entities mapped
@@ -98,7 +98,7 @@ class StemmerListener implements EventSubscriber
         foreach ($uow->getScheduledEntityDeletions() AS $entity) {
             $meta = $em->getClassMetadata(get_class($entity));
 
-            if (($config = $this->configuration) !== null) {
+            if ( (($config = $this->configuration) !== null) && ($this->isMappedClass($entity)) ) {
                 $this->getOrmAdapter()->setConfiguration($config);
 
                 $this->getOrmAdapter()->remove($em, $entity);
@@ -130,7 +130,26 @@ class StemmerListener implements EventSubscriber
 
     }
 
+    /**
+     * Checks to see if the Class is Mapped
+     *
+     * @param  Object  $entity
+     * @return boolean
+     */
+    private function isMappedClass($entity)
+    {
+        $class = null;
 
+        if (is_object($entity)) {
+            $class = get_class($entity);
+        }
+
+        if ($class == $this->configuration['mappedClass']) {
+            return true;
+        }
+
+        return false;
+    }
 
     public function getAnnotationParser()
     {
