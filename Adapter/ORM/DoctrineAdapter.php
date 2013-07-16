@@ -5,6 +5,7 @@ namespace Manhattan\PorterStemmerBundle\Adapter\ORM;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Manhattan\PorterStemmerBundle\Tools\PorterStemmer;
+use Manhattan\PorterStemmerBundle\Component\Configuration;
 use Manhattan\PorterStemmerBundle\Adapter\AdapterInterface;
 
 /**
@@ -14,8 +15,14 @@ use Manhattan\PorterStemmerBundle\Adapter\AdapterInterface;
  */
 class DoctrineAdapter implements AdapterInterface
 {
+    /**
+     * @var Manhattan\PorterStemmerBundle\Component\Configuration
+     */
     private $configuration;
 
+    /**
+     * @var Manhattan\PorterStemmerBundle\Tools\PorterStemmer
+     */
     private $porterStemmer;
 
     /**
@@ -51,8 +58,8 @@ class DoctrineAdapter implements AdapterInterface
             $mappedId = $meta->getReflectionProperty($propertyName)->getValue($object);
 
             $qb->select('node')
-                ->from($this->configuration['objectClass'], 'node')
-                ->where($qb->expr()->eq('node.'. $this->configuration['mappedField'], ':mappedField'))
+                ->from($this->configuration->getObjectClass(), 'node')
+                ->where($qb->expr()->eq('node.'. $this->configuration->getMappedField(), ':mappedField'))
                 ->setParameter(':mappedField', null === $mappedId ?
                     'NULL' :
                     (is_string($mappedId) ? $qb->expr()->literal($mappedId) : $mappedId)
@@ -81,17 +88,15 @@ class DoctrineAdapter implements AdapterInterface
         $words = $this->createStems($meta, $object);
 
         foreach ($words as $word => $weight) {
-            $new = $em->getClassMetadata($this->configuration['objectClass']);
+            $new = $em->getClassMetadata($this->configuration->getObjectClass());
 
-            if ($new->hasField($this->getName($meta->name))) {
-                $newEntity = $new->newInstance();
+            $newEntity = $new->newInstance();
 
-                $new->getReflectionProperty('word')->setValue($newEntity, $word);
-                $new->getReflectionProperty('weight')->setValue($newEntity, $weight);
-                $new->getReflectionProperty($this->getName($meta->name))->setValue($newEntity, $object);
+            $new->getReflectionProperty('word')->setValue($newEntity, $word);
+            $new->getReflectionProperty('weight')->setValue($newEntity, $weight);
+            $new->getReflectionProperty($this->getName($meta->name))->setValue($newEntity, $object);
 
-                $uow->persist($newEntity);
-            }
+            $uow->persist($newEntity);
         }
     }
 
@@ -108,7 +113,7 @@ class DoctrineAdapter implements AdapterInterface
         $rawText = '';
         $properties = $meta->getReflectionProperties();
 
-        foreach ($this->configuration['fields'] as $field) {
+        foreach ($this->configuration->getFields() as $field) {
             if (array_key_exists($field['name'], $properties)) {
                 $refProperty = $meta->getReflectionProperty($field['name']);
                 $fieldValue = $refProperty->getValue($object);
@@ -134,7 +139,7 @@ class DoctrineAdapter implements AdapterInterface
     /**
      * Set Configuration
      *
-     * @param array $configuration
+     * @param Configuration $configuration
      */
     public function setConfiguration($configuration)
     {

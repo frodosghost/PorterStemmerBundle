@@ -1,6 +1,6 @@
 <?php
 
-namespace Manhattan\PorterStemmerBundle\Tests\Tools;
+namespace Manhattan\PorterStemmerBundle\Tests\Component;
 
 use Manhattan\PorterStemmerBundle\Component\AnnotationParser;
 
