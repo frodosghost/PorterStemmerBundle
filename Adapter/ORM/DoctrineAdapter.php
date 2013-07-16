@@ -82,13 +82,16 @@ class DoctrineAdapter implements AdapterInterface
 
         foreach ($words as $word => $weight) {
             $new = $em->getClassMetadata($this->configuration['objectClass']);
-            $newEntity = $new->newInstance();
 
-            $new->getReflectionProperty('word')->setValue($newEntity, $word);
-            $new->getReflectionProperty('weight')->setValue($newEntity, $weight);
-            $new->getReflectionProperty($this->getName($meta->name))->setValue($newEntity, $object);
+            if ($new->hasField($this->getName($meta->name))) {
+                $newEntity = $new->newInstance();
 
-            $uow->persist($newEntity);
+                $new->getReflectionProperty('word')->setValue($newEntity, $word);
+                $new->getReflectionProperty('weight')->setValue($newEntity, $weight);
+                $new->getReflectionProperty($this->getName($meta->name))->setValue($newEntity, $object);
+
+                $uow->persist($newEntity);
+            }
         }
     }
 
