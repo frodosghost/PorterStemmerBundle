@@ -57,7 +57,7 @@ class PorterStemmer
                 continue;
             }
 
-            $stemmedWords[] = Porter::stem($word);
+            $stemmedWords[] = $this->stemWord($word);
         }
 
         return $stemmedWords;
@@ -77,5 +77,21 @@ class PorterStemmer
         return array_diff($words, $this->exclusions);
     }
 
+    /**
+     * Stems the Word and corrects word to UTF-8 encoding
+     *
+     * @param  string $word
+     * @return string
+     */
+    private function stemWord($word)
+    {
+        $stemmedWord = Porter::stem($word);
+
+        if ((mb_detect_encoding($stemmedWord) !== "UTF-8") || !(mb_check_encoding($stemmedWord, "UTF-8"))) {
+            $stemmedWord = utf8_encode($stemmedWord);
+        }
+
+        return $stemmedWord;
+    }
 
 }
