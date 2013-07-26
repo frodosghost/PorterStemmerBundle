@@ -41,7 +41,7 @@ class Search
      */
     private $post;
 
-    ...
+    [...]
 }
 
 ```
@@ -64,7 +64,7 @@ use Manhattan\PorterStemmerBundle\Mapping\Annotation as Stem;
  */
 class Post
 {
-    ...
+    [...]
 }
 
 ```
@@ -76,7 +76,7 @@ When the Entity is persisted each field specified with the Stem() annotation wil
 The weight option adds an importance to the field allowing you to adjust the value fields have within the __Search__ entity. It multiplies the words when they are saved, thus creating a higher count and allowing you to rank search results on the number of times a word appears.
 
 ``` php
-...
+[...]
 
 /**
  * @var string
@@ -92,6 +92,6 @@ private $title;
  */
 private $body;
 
-...
+[...]
 
 ```
