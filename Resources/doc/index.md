@@ -6,7 +6,7 @@ Installation
 
 1. Add this bundle to your project in composer.json:
 
-    Symfony 2.3 uses composer (http://www.getcomposer.org) to organize dependencies:
+    PorterStemmer uses composer (http://www.getcomposer.org) to organize dependencies:
 
     ```json
     {
