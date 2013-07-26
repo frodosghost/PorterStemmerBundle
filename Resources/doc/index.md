@@ -29,3 +29,10 @@ Installation
         );
     }
     ```
+
+Documentation
+-------------
+
+1. [Setup](https://github.com/frodosghost/PorterStemmerBundle/blob/master/Resources/doc/setup.md)
+
+2. [Command Line Functionality](https://github.com/frodosghost/PorterStemmerBundle/blob/master/Resources/doc/command-line.md)
